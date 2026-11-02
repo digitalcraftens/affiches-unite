@@ -45,8 +45,8 @@ button,input,textarea{font:inherit;color:inherit}
 .zl{background:var(--tile),radial-gradient(circle at 50% 30%,var(--red2),var(--red) 55%,#7a131b);color:#fff}
 #splash{position:fixed;inset:0;z-index:200;display:grid;place-content:center;justify-items:center;gap:14px;text-align:center;padding:24px;transition:opacity .7s,visibility .7s;overflow:hidden}
 #splash.off{opacity:0;visibility:hidden}
-#splash>*{position:relative;z-index:1}
-.bigstar,.hero::after{content:"";position:absolute;width:min(130vw,820px);aspect-ratio:1;inset-inline-start:50%;top:50%;translate:-50% -50%;background:var(--star) center/contain no-repeat;opacity:.55;animation:spin 90s linear infinite;pointer-events:none}
+#splash>:not(.bigstar){position:relative;z-index:1}
+.bigstar,.hero::after{content:"";position:absolute;width:min(130vw,820px);aspect-ratio:1;inset-inline-start:50%;top:50%;translate:-50% -50%;background:var(--star) center/contain no-repeat;opacity:.4;animation:spin 90s linear infinite;pointer-events:none}
 [dir=rtl] .bigstar,[dir=rtl] .hero::after{translate:50% -50%}
 @keyframes spin{to{rotate:360deg}}
 .plate{display:flex;align-items:center;gap:22px;background:#fff;border-radius:20px;padding:14px 24px;box-shadow:0 16px 40px #0004}
