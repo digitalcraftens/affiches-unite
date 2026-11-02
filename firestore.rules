@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /affiches/{id} {
+      // Tout le monde peut voir la galerie.
+      allow read: if true;
+      // Tout le monde peut ajouter une affiche valide.
+      allow create: if request.resource.data.keys().hasOnly(['nom','description','image','createdAt'])
+        && request.resource.data.nom is string
+        && request.resource.data.nom.size() > 0 && request.resource.data.nom.size() < 90
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0 && request.resource.data.description.size() < 700
+        && request.resource.data.image is string
+        && request.resource.data.image.size() < 950000
+        && request.resource.data.createdAt == request.time;
+      // Personne ne peut modifier ni supprimer depuis le site.
+      // Pour retirer une affiche : console Firebase > Firestore.
+      allow update, delete: if false;
+    }
+  }
+}

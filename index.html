@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fête de l’Unité – Concours de la meilleure affiche | Digital Craft</title>
+<meta name="theme-color" content="#b8222b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<!--
+  INSTALLATION (GitHub Pages)
+  1. Dépôt : index.html, assets/ (logos), audio/hymne-national.mp3, audio/sawt-al-hassan.mp3
+  2. Firebase (gratuit, plan Spark) : créer un projet > Firestore Database > coller la config web dans FIREBASE_CONFIG plus bas.
+     Pas besoin de Storage : les affiches sont compressées (≈ 300 Ko) puis enregistrées dans Firestore.
+  3. Règles Firestore :
+     rules_version = '2';
+     service cloud.firestore { match /databases/{d}/documents { match /affiches/{id} {
+       allow read: if true;
+       allow create: if request.resource.data.keys().hasOnly(['nom','description','image','createdAt'])
+         && request.resource.data.nom.size() < 90 && request.resource.data.description.size() < 700
+         && request.resource.data.image.size() < 950000;
+       allow update, delete: if false; } } }
+     (supprimer une affiche : console Firebase > Firestore)
+-->
+<style>
+:root{--red:#b8222b;--red2:#d23a3f;--green:#0b6b3a;--gold:#e3b04b;--ink:#1c1a24;--bg:#faf8f5;--line:#e4ddd3;--muted:#5d5866;
+--star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23e3b04b' stroke-width='.7'%3E%3Crect x='14' y='14' width='72' height='72'/%3E%3Crect x='14' y='14' width='72' height='72' transform='rotate(45 50 50)'/%3E%3Crect x='30' y='30' width='40' height='40'/%3E%3Crect x='30' y='30' width='40' height='40' transform='rotate(45 50 50)'/%3E%3C/g%3E%3C/svg%3E");
+--tile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.11' stroke-width='1.2'%3E%3Crect x='16' y='16' width='40' height='40'/%3E%3Crect x='16' y='16' width='40' height='40' transform='rotate(45 36 36)'/%3E%3C/g%3E%3C/svg%3E")}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:400 1.05rem/1.65 'Tajawal',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+h1,h2,h3,.brand{font-family:'Reem Kufi','Tajawal',serif;font-weight:700;line-height:1.2;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+.flag{height:6px;background:linear-gradient(90deg,var(--red) 50%,var(--green) 50%)}
+
+/* contrôles fixes */
+.ctl{position:fixed;top:14px;inset-inline-end:14px;z-index:300;display:flex;gap:8px}
+.ctl button{height:42px;min-width:42px;padding:0 14px;border-radius:21px;border:1px solid #ffffff66;background:#1c1a24cc;color:#fff;cursor:pointer;backdrop-filter:blur(6px)}
+.ctl button:hover{background:#000}
+
+/* écran d'accueil */
+.zl{background:var(--tile),radial-gradient(circle at 50% 30%,var(--red2),var(--red) 55%,#7a131b);color:#fff}
+#splash{position:fixed;inset:0;z-index:200;display:grid;place-content:center;justify-items:center;gap:14px;text-align:center;padding:24px;transition:opacity .7s,visibility .7s;overflow:hidden}
+#splash.off{opacity:0;visibility:hidden}
+#splash>*{position:relative;z-index:1}
+.bigstar,.hero::after{content:"";position:absolute;width:min(130vw,820px);aspect-ratio:1;inset-inline-start:50%;top:50%;translate:-50% -50%;background:var(--star) center/contain no-repeat;opacity:.55;animation:spin 90s linear infinite;pointer-events:none}
+[dir=rtl] .bigstar,[dir=rtl] .hero::after{translate:50% -50%}
+@keyframes spin{to{rotate:360deg}}
+.plate{display:flex;align-items:center;gap:22px;background:#fff;border-radius:20px;padding:14px 24px;box-shadow:0 16px 40px #0004}
+.plate img{display:block;height:auto}
+.plate .dc{width:112px}.plate .ens{width:190px}
+#splash h1{font-size:clamp(2.6rem,9vw,5.2rem)}
+#splash p{margin:0;font-size:1.25rem;opacity:.92}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px}
+.btn{display:inline-block;border:0;border-radius:999px;padding:13px 28px;font-weight:700;cursor:pointer;text-decoration:none;background:var(--gold);color:#2a1a00;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:#fff;border:2px solid #fff9}
+.btn.green{background:var(--green);color:#fff;width:100%}
+.btn[disabled]{opacity:.6;cursor:wait}
+
+/* en-tête */
+.top{display:flex;align-items:center;gap:12px;padding:10px 20px;padding-inline-end:190px;background:#fff;border-bottom:1px solid var(--line)}
+.top img{height:38px;width:auto}
+.brand{font-size:1.15rem}
+.top nav{margin-inline-start:auto;display:flex;gap:18px}
+.top nav a{color:var(--ink);text-decoration:none;font-weight:500}
+.top nav a:hover{color:var(--red)}
+
+/* hero */
+.hero{position:relative;overflow:hidden;text-align:center;padding:84px 20px 100px}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:clamp(2.2rem,7vw,4.4rem);margin:10px auto 14px;max-width:16ch}
+.hero .dates{display:inline-block;border:1.5px solid var(--gold);color:var(--gold);border-radius:999px;padding:4px 18px;font-weight:500}
+.hero .lead{max-width:46ch;margin:0 auto 26px;font-size:1.2rem;opacity:.95}
+
+/* sections */
+section{padding:64px 0}
+h2{font-size:clamp(1.7rem,4vw,2.5rem);margin-bottom:8px}
+.sub{color:var(--muted);margin:0 0 28px}
+.form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;display:grid;gap:18px;max-width:640px}
+label{display:grid;gap:6px;font-weight:700}
+input[type=text],textarea{border:2px solid var(--line);border-radius:12px;padding:11px 14px;background:#fff;font-weight:400}
+input[type=text]:focus,textarea:focus{border-color:var(--green);outline:0}
+textarea{min-height:110px;resize:vertical}
+input[type=file]::file-selector-button{margin-inline-end:12px;border:0;border-radius:999px;padding:8px 16px;background:var(--ink);color:#fff;cursor:pointer;font:inherit}
+.hint{font-weight:400;font-size:.9rem;color:var(--muted)}
+#pv{max-height:220px;max-width:100%;border-radius:10px;border:1px solid var(--line);justify-self:start}
+#msg{margin:0;min-height:1.6em;font-weight:700;color:var(--green)}
+#msg.bad{color:var(--red)}
+.demo{background:#fff4d6;border:1px solid var(--gold);border-radius:12px;padding:10px 16px;margin-bottom:22px;font-size:.95rem}
+
+/* galerie */
+.gal{background:#fff;border-block:1px solid var(--line)}
+.count{display:inline-block;margin-inline-start:10px;background:var(--green);color:#fff;border-radius:999px;padding:0 14px;font:700 1.1rem 'Reem Kufi',sans-serif;vertical-align:middle}
+.grid{columns:3 250px;column-gap:20px}
+.card{break-inside:avoid;margin:0 0 20px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg);cursor:pointer}
+.card:hover,.card:focus-visible{border-color:var(--red);outline-offset:0}
+.card img{display:block;width:100%;height:auto}
+.card figcaption{padding:12px 16px 14px}
+.card b{font-family:'Reem Kufi','Tajawal',serif;font-size:1.1rem}
+.card p{margin:2px 0 0;font-size:.94rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#empty{color:var(--muted);border:2px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center}
+
+/* lightbox */
+dialog{border:0;padding:0;border-radius:18px;width:min(94vw,860px);overflow:hidden;background:#fff}
+dialog::backdrop{background:#120708d9}
+dialog img{display:block;width:100%;max-height:72vh;object-fit:contain;background:#16141c}
+.lbi{padding:18px 22px;display:grid;gap:6px}
+.lbi p{margin:0;color:var(--muted);white-space:pre-line}
+.lbi .row{justify-content:flex-start}
+.lbi .btn{padding:9px 20px;background:var(--ink);color:#fff}
+
+footer{background:var(--ink);color:#e9e5ee;text-align:center;padding:36px 20px 44px}
+footer .plate{display:inline-flex;margin-bottom:16px;box-shadow:none}
+footer .plate .dc{width:70px}footer .plate .ens{width:130px}
+footer p{margin:0}
+@media (max-width:640px){.top{padding-inline-end:20px;padding-top:62px;flex-wrap:wrap}.top nav{margin-inline-start:0}.plate .dc{width:84px}.plate .ens{width:130px}}
+@media (prefers-reduced-motion:reduce){.bigstar,.hero::after{animation:none}html{scroll-behavior:auto}#splash{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="ctl">
+  <button id="lang" type="button" aria-label="Langue / اللغة">العربية</button>
+  <button id="mute" type="button" aria-label="Son / الصوت" aria-pressed="true">🔇</button>
+</div>
+
+<div id="splash" class="zl">
+  <div class="bigstar"></div>
+  <div class="plate">
+    <img class="dc" src="assets/digital-craft-logo.png" alt="Digital-Craft ENS Club">
+    <img class="ens" src="assets/ens-logo.png" alt="École Normale Supérieure de Marrakech">
+  </div>
+  <h1 data-i18n="feast"></h1>
+  <p data-i18n="sub"></p>
+  <div class="row">
+    <button class="btn" id="enterS" type="button" data-i18n="enterS"></button>
+    <button class="btn ghost" id="enterM" type="button" data-i18n="enterM"></button>
+  </div>
+</div>
+
+<div class="flag"></div>
+<header class="top">
+  <img src="assets/digital-craft-logo.png" alt="">
+  <span class="brand">Digital Craft</span>
+  <nav><a href="#participer" data-i18n="nav1"></a><a href="#galerie" data-i18n="nav2"></a></nav>
+</header>
+
+<main>
+  <div class="hero zl">
+    <span class="dates" data-i18n="dates"></span>
+    <h1 data-i18n="h1"></h1>
+    <p class="lead" data-i18n="lead"></p>
+    <div class="row">
+      <a class="btn" href="#participer" data-i18n="go"></a>
+      <a class="btn ghost" href="#galerie" data-i18n="see"></a>
+    </div>
+  </div>
+
+  <section id="participer">
+    <div class="wrap">
+      <h2 data-i18n="ft"></h2>
+      <p class="sub" data-i18n="fs"></p>
+      <div class="demo" id="demo" hidden data-i18n="demo"></div>
+      <form class="form" id="form" autocomplete="off">
+        <label><span data-i18n="nm"></span>
+          <input type="text" id="nom" required maxlength="80" data-ph="nmp"></label>
+        <label><span data-i18n="ds"></span>
+          <textarea id="desc" required maxlength="600" data-ph="dsp"></textarea></label>
+        <label><span data-i18n="fl"></span>
+          <input type="file" id="file" accept="image/png,image/jpeg,image/webp" required>
+          <span class="hint" data-i18n="hint"></span></label>
+        <img id="pv" alt="" hidden>
+        <button class="btn green" id="send" type="submit" data-i18n="send"></button>
+        <p id="msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="galerie" class="gal">
+    <div class="wrap">
+      <h2><span data-i18n="gt"></span><span class="count" id="count">0</span></h2>
+      <p class="sub" data-i18n="gs"></p>
+      <div id="empty" data-i18n="empty"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="lb">
+  <img id="lbImg" alt="">
+  <div class="lbi">
+    <h3 id="lbName"></h3>
+    <p id="lbDesc"></p>
+    <div class="row"><a class="btn" id="lbDl" download="affiche.jpg" data-i18n="dl"></a><button class="btn" id="lbX" type="button" data-i18n="close"></button></div>
+  </div>
+</dialog>
+
+<footer>
+  <div class="plate">
+    <img class="dc" src="assets/digital-craft-logo.png" alt="Digital-Craft ENS Club">
+    <img class="ens" src="assets/ens-logo.png" alt="École Normale Supérieure de Marrakech">
+  </div>
+  <p data-i18n="foot"></p>
+</footer>
+
+<script type="module">
+/* ====== 1. CONFIG FIREBASE : à remplacer par celle de votre projet ====== */
+const FIREBASE_CONFIG = {
+  apiKey: "COLLER_ICI",
+  authDomain: "VOTRE-PROJET.firebaseapp.com",
+  projectId: "VOTRE-PROJET",
+  appId: "COLLER_ICI"
+};
+/* ====== 2. MUSIQUE : fichiers à placer dans le dossier audio/ ====== */
+const TRACKS = ["audio/hymne-national.mp3", "audio/sawt-al-hassan.mp3"];
+
+const T = {
+fr:{feast:"Fête de l’Unité",sub:"Concours de la meilleure affiche",enterS:"Entrer avec le son",enterM:"Entrer en silence",
+dates:"Du 2 au 4 novembre 2026",h1:"Concours de la meilleure affiche",
+lead:"Créez une affiche qui célèbre l’unité et la fierté nationale, puis partagez-la avec toute l’ENS Marrakech.",
+go:"Participer",see:"Voir la galerie",nav1:"Participer",nav2:"Galerie",
+ft:"Déposez votre affiche",fs:"Remplissez le formulaire : votre affiche apparaît dans la galerie dès l’envoi.",
+nm:"Nom complet",nmp:"Ex. : Salma El Idrissi",ds:"Description de l’affiche",dsp:"Le message, les symboles, l’idée derrière votre création",
+fl:"Votre affiche",hint:"JPG, PNG ou WebP. L’image est optimisée automatiquement.",send:"Envoyer mon affiche",
+gt:"La galerie des affiches",gs:"Touchez une affiche pour l’agrandir.",empty:"Aucune affiche pour l’instant. Soyez la première ou le premier à participer.",
+close:"Fermer",dl:"Télécharger",sending:"Envoi en cours…",ok:"Merci ! Votre affiche est dans la galerie.",
+err:"L’envoi a échoué. Vérifiez votre connexion et réessayez.",bad:"Choisissez une image JPG, PNG ou WebP.",
+demo:"Mode test : Firebase n’est pas encore configuré, les affiches restent sur cet appareil.",
+foot:"Organisé par le club Digital Craft, École Normale Supérieure de Marrakech"},
+ar:{feast:"عيد الوحدة",sub:"مسابقة أفضل ملصق",enterS:"الدخول مع الصوت",enterM:"الدخول بدون صوت",
+dates:"من 2 إلى 4 نونبر 2026",h1:"مسابقة أفضل ملصق",
+lead:"صمّموا ملصقًا يحتفي بالوحدة والاعتزاز بالوطن، ثم شاركوه مع كل أسرة المدرسة العليا للأساتذة بمراكش.",
+go:"شاركوا الآن",see:"شاهدوا المعرض",nav1:"المشاركة",nav2:"المعرض",
+ft:"أرسلوا ملصقكم",fs:"املؤوا الاستمارة، وسيظهر ملصقكم في المعرض فور إرساله.",
+nm:"الاسم الكامل",nmp:"مثال: سلمى الإدريسي",ds:"وصف الملصق",dsp:"الرسالة والرموز والفكرة وراء عملكم",
+fl:"ملصقكم",hint:"صيغ JPG أو PNG أو WebP. تتم معالجة الصورة تلقائيًا.",send:"إرسال الملصق",
+gt:"معرض الملصقات",gs:"المسوا أي ملصق لتكبيره.",empty:"لا توجد ملصقات بعد. كونوا أول المشاركين.",
+close:"إغلاق",dl:"تحميل",sending:"جارٍ الإرسال…",ok:"شكرًا! ملصقكم أصبح في المعرض.",
+err:"تعذّر الإرسال. تأكدوا من الاتصال بالإنترنت وأعيدوا المحاولة.",bad:"اختاروا صورة بصيغة JPG أو PNG أو WebP.",
+demo:"وضع تجريبي: لم يتم ربط Firebase بعد، لذلك تبقى الملصقات على هذا الجهاز فقط.",
+foot:"تنظيم نادي Digital Craft، المدرسة العليا للأساتذة بمراكش"}
+};
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+             set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+/* ---------- langue ---------- */
+let lang = ls.get("dc-lang") || ((navigator.language || "").startsWith("ar") ? "ar" : "fr");
+let lastMsg = null, items = [];
+function setLang(l) {
+  lang = l; ls.set("dc-lang", l);
+  document.documentElement.lang = l;
+  document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
+  $$("[data-i18n]").forEach(e => e.textContent = T[l][e.dataset.i18n]);
+  $$("[data-ph]").forEach(e => e.placeholder = T[l][e.dataset.ph]);
+  $("#lang").textContent = l === "ar" ? "Français" : "العربية";
+  if (lastMsg) msg(...lastMsg);
+}
+$("#lang").onclick = () => setLang(lang === "ar" ? "fr" : "ar");
+
+/* ---------- musique ---------- */
+const au = new Audio(); au.volume = .45;
+let ti = 0, fails = 0, muted = true;
+const loadTrack = () => { au.src = TRACKS[ti % TRACKS.length]; };
+const playIt = () => { if (!muted) au.play().catch(() => {}); };
+au.addEventListener("ended", () => { ti++; loadTrack(); playIt(); });
+au.addEventListener("playing", () => { fails = 0; });
+au.addEventListener("error", () => { if (++fails < TRACKS.length) { ti++; loadTrack(); playIt(); } });
+function setMute(m) {
+  muted = m;
+  $("#mute").textContent = m ? "🔇" : "🔊";
+  $("#mute").setAttribute("aria-pressed", m);
+  if (m) au.pause(); else { if (!au.src) loadTrack(); playIt(); }
+}
+$("#mute").onclick = () => setMute(!muted);
+const enter = withSound => { $("#splash").classList.add("off"); setMute(!withSound); };
+$("#enterS").onclick = () => enter(true);
+$("#enterM").onclick = () => enter(false);
+
+/* ---------- stockage : Firebase ou mode test local ---------- */
+const REMOTE = !/^COLLER/.test(FIREBASE_CONFIG.apiKey);
+let store;
+if (REMOTE) {
+  const V = "10.12.2", base = `https://www.gstatic.com/firebasejs/${V}/`;
+  const { initializeApp } = await import(base + "firebase-app.js");
+  const fs = await import(base + "firebase-firestore.js");
+  const col = fs.collection(fs.getFirestore(initializeApp(FIREBASE_CONFIG)), "affiches");
+  store = {
+    add: d => fs.addDoc(col, { ...d, createdAt: fs.serverTimestamp() }),
+    watch: cb => fs.onSnapshot(fs.query(col, fs.orderBy("createdAt", "desc"), fs.limit(120)),
+      s => cb(s.docs.map(x => ({ id: x.id, ...x.data() }))), e => console.error(e))
+  };
+} else {
+  $("#demo").hidden = false;
+  const K = "dc-affiches", read = () => { try { return JSON.parse(ls.get(K) || "[]"); } catch { return []; } };
+  let push = () => {};
+  store = {
+    add: async d => { const a = read(); a.unshift({ id: String(Date.now()), ...d });
+      localStorage.setItem(K, JSON.stringify(a)); push(a); },
+    watch: cb => { push = cb; cb(read()); }
+  };
+}
+
+/* ---------- compression de l'image ---------- */
+async function compress(file) {
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(1, 1000 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(bmp, 0, 0, c.width, c.height);
+  let q = .85, u;
+  do { u = c.toDataURL("image/jpeg", q); q -= .1; } while (u.length > 450000 && q > .25);
+  if (u.length > 900000) throw new Error("image trop lourde");
+  return u;
+}
+
+/* ---------- formulaire ---------- */
+function msg(key, bad) { lastMsg = [key, bad]; const m = $("#msg"); m.textContent = T[lang][key]; m.className = bad ? "bad" : ""; }
+$("#file").onchange = e => {
+  const f = e.target.files[0], pv = $("#pv");
+  pv.hidden = !f; if (f) pv.src = URL.createObjectURL(f);
+};
+$("#form").onsubmit = async e => {
+  e.preventDefault();
+  const f = $("#file").files[0];
+  if (!f || !/^image\/(png|jpe?g|webp)$/.test(f.type)) return msg("bad", 1);
+  $("#send").disabled = true; msg("sending");
+  try {
+    const image = await compress(f);
+    await store.add({ nom: $("#nom").value.trim().slice(0, 80), description: $("#desc").value.trim().slice(0, 600), image });
+    $("#form").reset(); $("#pv").hidden = true; msg("ok");
+    $("#galerie").scrollIntoView();
+  } catch (err) { console.error(err); msg("err", 1); }
+  $("#send").disabled = false;
+};
+
+/* ---------- galerie ---------- */
+const lb = $("#lb");
+function openLb(a) {
+  $("#lbImg").src = a.image; $("#lbImg").alt = a.description || "";
+  $("#lbName").textContent = a.nom; $("#lbDesc").textContent = a.description;
+  $("#lbDl").href = a.image; $("#lbDl").download = "affiche-" + (a.nom || "digital-craft").replace(/\s+/g, "-") + ".jpg";
+  lb.showModal();
+}
+$("#lbX").onclick = () => lb.close();
+lb.onclick = e => { if (e.target === lb) lb.close(); };
+function render() {
+  const g = $("#grid"); g.replaceChildren();
+  $("#empty").hidden = items.length > 0; $("#count").textContent = items.length;
+  for (const a of items) {
+    const c = el("figure", "card"), i = el("img"), cap = el("figcaption"), n = el("b"), p = el("p");
+    i.src = a.image; i.alt = a.description || ""; i.loading = "lazy";
+    n.textContent = a.nom; p.textContent = a.description;
+    cap.append(n, p); c.append(i, cap); c.tabIndex = 0;
+    c.onclick = () => openLb(a);
+    c.onkeydown = e => { if (e.key === "Enter") openLb(a); };
+    g.append(c);
+  }
+}
+store.watch(list => { items = list; render(); });
+setLang(lang);
+</script>
+</body>
+</html>
